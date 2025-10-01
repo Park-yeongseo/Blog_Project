@@ -5,21 +5,19 @@ uvicorn[standard]==0.27.0
 # Database
 sqlalchemy==2.0.25
 
-# Validation & Settings
-pydantic==2.5.3
-pydantic-settings==2.1.0
-email-validator==2.1.0
+# Validation & Settings (최신 버전으로 변경)
+pydantic==2.10.3
+pydantic-settings==2.6.1
+email-validator==2.2.0
 
 # Authentication & Security
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.6
 
-# OpenAI 
+# OpenAI
 openai==1.10.0
 
 # Utilities
 python-dotenv==1.0.1
 aiofiles==23.2.1
-
-# HTTP Client (optional, for external API calls)
 httpx==0.26.0
