@@ -8,12 +8,17 @@ class Settings(BaseSettings):
     app_name: str = "FastAPI App"
     debug: bool = False
     enviroment: str = "development"
-
-    # 보안 관련
-    secret_key: str = "Bo0kb1ar11oGCh@7Ju04!28$7924L5wi2"
+    
+    #open_ai URL
+    openai_url : str = ''
 
     # 데이터베이스 입력
-    database_url: str = "sqlite:///data/blog.db"
+    database_url: str = ''
+    
+    #jwt
+    jwt_secret : str = ''
+    jwt_algorithm : str = ''
+    access_token_expire_minute : str = ''
 
     # 서버 설정
     host: str = "0.0.0.0"
