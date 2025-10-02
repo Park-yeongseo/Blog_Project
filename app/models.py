@@ -39,7 +39,6 @@ class Tag(Base):
     __tablename__ = "tags"
     id = Column(Integer, primary_key=True)
     name = Column(VARCHAR(50), unique=True)
-    usage_count = Column(Integer, default=0)
     
     posttags = relationship("PostTag", back_populates='tags')
     
