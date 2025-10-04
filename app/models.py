@@ -12,7 +12,6 @@ class User(Base):
     bio = Column(Text, default='사용자가 소개를 입력하지 않았습니다.') # 여기에서 원래는 소개가 선택사항이었는데 디폴트 값으로 "사용자가 소개를 입력하지 않았습니다."로 출력되게 바꿨어요
     total_views = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.now) #여기도 timestamp->datetime으로 바꿨어요
-    
     posts = relationship("Post", back_populates='user')
     comments = relationship("Comment", back_populates='user')
     likes = relationship('Like', back_populates='user')
