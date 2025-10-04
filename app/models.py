@@ -32,7 +32,7 @@ class Post(Base):
     posttags = relationship('PostTag', back_populates='posts')
     book = relationship("Book", back_populates='posts')
     likes = relationship('Like', back_populates='post')
-
+    
 
 
 class Tag(Base):
