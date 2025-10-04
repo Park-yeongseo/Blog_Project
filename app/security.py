@@ -1,19 +1,18 @@
-import os
 import base64
 import hashlib
 from datetime import datetime, timedelta, timezone
+import os
 from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
+from app.config import settings
 
-# .env 파일에서 환경 변수 불러오기
-load_dotenv()
 
 # JWT 설정값
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+SECRET_KEY = settings.jwt_secret
+ALGORITHM = settings.jwt_algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = int(settings.access_token_expire_minute)
 
 # 비밀번호 해싱 클래스
 class PasswordHasher:
@@ -30,6 +29,7 @@ class PasswordHasher:
         stored_hash = decoded[16:]
         new_hash = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 100_000)
         return new_hash == stored_hash
+    
 
 # JWT 토큰 생성
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
