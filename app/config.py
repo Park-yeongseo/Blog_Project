@@ -12,12 +12,12 @@ class Settings(BaseSettings):
     openai_url : str = ''
 
     # 데이터베이스 입력
-    database_url: str = ''
+    database_url: str
     
     #jwt
     jwt_secret : str = ''
     jwt_algorithm : str = ''
-    access_token_expire_minute : int
+    access_token_expire_minutes: int
 
     # 서버 설정
     host: str = "0.0.0.0"

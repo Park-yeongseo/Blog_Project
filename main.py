@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from app.database import create_table
-from app.auth import router as auth_router # auth.py의 라우터 연결
+from app.routers.auth import router as auth_router # auth.py의 라우터 연결
 
 
 app= FastAPI()
