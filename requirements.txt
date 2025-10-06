@@ -3,9 +3,10 @@ fastapi==0.109.0
 uvicorn[standard]==0.27.0
 
 # Database
-sqlalchemy==2.0.25
+sqlalchemy==2.0.36
+alembic==1.14.0
 
-# Validation & Settings (최신 버전으로 변경)
+# Validation & Settings
 pydantic==2.10.3
 pydantic-settings==2.6.1
 email-validator==2.2.0

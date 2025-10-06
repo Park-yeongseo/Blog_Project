@@ -20,6 +20,9 @@ data/
 *.sqlite
 *.sqlite3
 
+# Alembic (추가!)
+alembic.ini
+
 # 로그
 logs/
 *.log
