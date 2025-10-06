@@ -11,7 +11,7 @@ import app.security
 router = APIRouter(prefix="/auth", tags=["Auth"])# 인증 엔드포인트
 
 # 회원가입
-@router.post("/auth/signup", response_model=UserResponse)
+@router.post("/signup", response_model=UserResponse)
 def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     # 이메일 중복 확인
     if db.query(UserModel).filter(UserModel.email == user_data.email).first():
@@ -40,7 +40,7 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 # 로그인 (JWT 발급)
-@router.post("/auth/login")
+@router.post("/login")
 def login(
     email: str = Form(...),
     password: str = Form(...),
@@ -64,13 +64,13 @@ def login(
 
 
 # 로그아웃
-@router.post("/auth/logout")
+@router.post("/logout")
 def logout(user: UserModel = Depends(app.security.get_current_user)):
     return{"message": "로그아웃 되었습니다."}
 
 
 # 회원 탈퇴
-@router.delete("/auth/withdraw")
+@router.delete("/withdraw")
 def withdraw(
     user: UserModel = Depends(app.security.get_current_user),
     db: Session = Depends(get_db)
