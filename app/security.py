@@ -1,18 +1,20 @@
 import base64
 import hashlib
-from datetime import datetime, timedelta, timezone
 import os
+from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from dotenv import load_dotenv
-from app.config import settings
+from sqlalchemy.orm import Session
 
+from app.config import settings
+from app.database import get_db
+from app.models import User as UserModel
 
 # JWT 설정값
 SECRET_KEY = settings.jwt_secret
 ALGORITHM = settings.jwt_algorithm
-ACCESS_TOKEN_EXPIRE_MINUTES = int(settings.access_token_expire_minute)
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes  # 기본값 제거 후 .env에서 주입
 
 # 비밀번호 해싱 클래스
 class PasswordHasher:
@@ -51,10 +53,17 @@ def decode_access_token(token: str) -> dict:
 security = HTTPBearer()
 
 # 현재 사용자 정보 추출
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)) -> UserModel:
     token = credentials.credentials
     try:
         payload = decode_access_token(token)
-        return payload["sub"]
+        user_id = int(payload["sub"])
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+    # 사용자 조회
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+    
+    return user

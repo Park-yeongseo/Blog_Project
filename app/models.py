@@ -44,8 +44,8 @@ class Tag(Base):
     
 class PostTag(Base):
     __tablename__ = "posttags"
-    post_id = Column(Integer, ForeignKey("posts.id", primary_key=True))
-    tag_id = Column(Integer, ForeignKey("tags.id", primary_key=True))
+    post_id = Column(Integer, ForeignKey("posts.id"), primary_key=True)
+    tag_id = Column(Integer, ForeignKey("tags.id"), primary_key=True)
     
     tags = relationship('Tag', back_populates='posttags')
     posts = relationship('Post', back_populates='posttags')
@@ -69,8 +69,8 @@ class Comment(Base):
     
 class Like(Base):
     __tablename__ = "likes"
-    user_id = Column(Integer, ForeignKey("users.id", primary_key=True))
-    post_id = Column(Integer, ForeignKey("posts.id", primary_key=True))
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), primary_key=True)
     created_at = Column(DateTime, default=datetime.now)
     
     user = relationship('User', back_populates='likes')
@@ -79,8 +79,8 @@ class Like(Base):
 
 class Follow(Base):
     __tablename__ = 'follows'
-    follower_id = Column(Integer, ForeignKey("users.id", primary_key=True))   # 팔로우 하는 사람
-    following_id = Column(Integer, ForeignKey("users.id", primary_key=True))  # 팔로우 당하는 사람
+    follower_id = Column(Integer, ForeignKey("users.id"), primary_key=True)   # 팔로우 하는 사람
+    following_id = Column(Integer, ForeignKey("users.id"), primary_key=True)  # 팔로우 당하는 사람
     created_at = Column(DateTime, default=datetime.now)
     
 class Book(Base):
@@ -96,7 +96,7 @@ class Book(Base):
 
 class UserTagPreference(Base):
     __tablename__ = "usertagpreferences"
-    user_id = Column(Integer, ForeignKey("users.id", primary_key=True))
-    tag_id = Column(Integer, ForeignKey("tags.id", primary_key=True))
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    tag_id = Column(Integer, ForeignKey("tags.id"), primary_key=True)
     frequency = Column(Integer, default=0)
     
