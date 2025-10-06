@@ -18,21 +18,5 @@ def validation_handler(request, exc):
         }
     )
 
-# HTTPException 커스터마이징 핸들러
-@app.exception_handler(HTTPException)
-def http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error_code": "HTTPException",
-            "message": exc.detail,
-            "status": exc.status_code,
-            "path": str(request.url)
-        }
-    )
-
-# DB 테이블 생성
-create_table()
-
 # 라우터 연결
 app.include_router(auth_router)
