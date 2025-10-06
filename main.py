@@ -22,6 +22,6 @@ def validation_handler(request, exc):
 app.include_router(auth_router)
 
 
-@app.get('/')
+@app.get('/healthy')
 def health_check():
     return {'hello': 'world'}
