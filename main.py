@@ -20,3 +20,8 @@ def validation_handler(request, exc):
 
 # 라우터 연결
 app.include_router(auth_router)
+
+
+@app.get('/')
+def health_check():
+    return {'hello': 'world'}
