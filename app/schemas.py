@@ -173,6 +173,7 @@ class Post(BaseModel):
     content: str
     isbn : str
     views : int
+    like_count : int
     created_at : datetime.datetime
     tags : List[TagResponse]
     

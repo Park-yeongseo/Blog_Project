@@ -25,11 +25,13 @@ class Post(Base):
     content = Column(Text)
     isbn = Column(VARCHAR(13),ForeignKey("books.isbn"))
     views = Column(Integer, default=0)
+    like_count = Column(Integer, default=0)
     created_at = Column(DateTime,default=datetime.now) # 여기도 datetime으로 바꿨어요
     
     user = relationship('User', back_populates='posts')
     comments = relationship('Comment', back_populates='post')
     posttags = relationship('PostTag', back_populates='posts')
+    tags = relationship('Tag',secondary='posttags', viewonly=True)
     book = relationship("Book", back_populates='posts')
     likes = relationship('Like', back_populates='post')
     
