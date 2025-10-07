@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models import User, Follow
-from routers.auth import get_current_user
+from app.security import get_current_user
 from app.database import get_db
 
 
 router = APIRouter(prefix="/users", tags=["Follows"])
 
-# POST /users/{user_id}/follow -> 팔로우
+# 팔로우
 @router.post("/{user_id}/follow")
 def follow_user(
     user_id: int,
@@ -33,8 +33,8 @@ def follow_user(
     return {"message": "팔로우 완료"}
 
 
-# DELETE /users/{user_id}/unfollow -> 언팔로우
-@router.delete("/{user_id/unfollow}")
+# 언팔로우
+@router.delete("/{user_id}/unfollow")
 def unfollow_user(
         user_id: int,
         db: Session = Depends(get_db),
@@ -54,12 +54,55 @@ def unfollow_user(
     return {"message": "언팔로우 완료"}
 
 
-# GET /users/{user_id}/followers -> 팔로워 목록
+# 팔로워 목록
+@router.get("/{user_id}/followers")
+def get_followers(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    
+    followers = db.query(User).join(
+        Follow, Follow.follower_id == User.id).filter(
+            Follow.following_id == user_id
+            ).all()
+    
+    return {
+        "followers": [
+            {"id": user.id, "username": user.username}
+            for user in followers
+        ]
+    }
+
+# 팔로잉 목록
+@router.get("/{user_id}/following")
+def get_following(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    following = db.query(User).join(
+        Follow, Follow.following_id == User.id
+    ).filter(
+        Follow.follower_id == user_id
+    ).all()
+
+    return {
+        "follwing": [
+            {"id": user.id, "username": user.username}
+            for user in following
+        ]
+    }
 
 
+# 팔로우 상태 확인
+@router.get("/{user_id}/follow-status")
+def check_follow_status(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    follow_record = db.query(Follow).filter_by(
+        follower_id=current_user.id,
+        following_id=user_id
+    ).first()
 
-# GET /users/{user_id}/following -> 팔로잉 목록
-
-
-
-# GET /users/{user_id}/follow-status -> 팔로우 상태 확인
+    return {"is_following": bool(follow_record)}
