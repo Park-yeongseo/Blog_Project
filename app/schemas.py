@@ -178,3 +178,14 @@ class Post(BaseModel):
     tags : List[TagResponse]
     
     model_config = ConfigDict(from_attributes=True)
+
+
+class SearchResult(BaseModel):
+    post_id: int
+    title: str
+    book_title: str
+    isbn: str
+    tags: List[str]
+    created_at: datetime.datetime
+
+    model_config = ConfigDict(from_attributes=True)

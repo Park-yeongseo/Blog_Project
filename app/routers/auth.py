@@ -4,7 +4,7 @@ from datetime import datetime
 
 from app.database import get_db
 from app.models import User as UserModel
-from app.schemas import UserCreate, UserResponse, LoginRequest
+from app.schemas import UserCreate, UserResponse, Login as LoginRequest
 from app.security import PasswordHasher, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])  # 인증 엔드포인트

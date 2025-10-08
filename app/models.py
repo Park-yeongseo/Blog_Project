@@ -16,6 +16,7 @@ class User(Base):
     comments = relationship("Comment", back_populates='user')
     likes = relationship('Like', back_populates='user')
 
+
 class Post(Base):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True)
@@ -33,7 +34,6 @@ class Post(Base):
     tags = relationship('Tag',secondary='posttags', viewonly=True)
     book = relationship("Book", back_populates='posts')
     likes = relationship('Like', back_populates='post')
-    
 
 
 class Tag(Base):
@@ -53,7 +53,6 @@ class PostTag(Base):
     posts = relationship('Post', back_populates='posttags')
     
     
-
 class Comment(Base):
     __tablename__ = "comments"
     id = Column(Integer, primary_key=True)
@@ -85,6 +84,7 @@ class Follow(Base):
     following_id = Column(Integer, ForeignKey("users.id"), primary_key=True)  # 팔로우 당하는 사람
     created_at = Column(DateTime, default=datetime.now)
     
+
 class Book(Base):
     __tablename__ = 'books'
     id = Column(Integer, primary_key=True)
