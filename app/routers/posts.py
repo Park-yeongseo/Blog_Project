@@ -1,6 +1,6 @@
 import json
 import random
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 import httpx
 from sqlalchemy import and_, func, insert, update
@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models import Book, Post as PostModel, PostTag, Tag, User, UserTagPreference
 from app.schemas import Post, PostCreate, PostUpdate
 from app.schemas import UserResponse
-from app.security import get_current_user
+from app.security import get_current_user, get_current_user_optional
 from sqlalchemy.orm import Session
 from app.config import settings
 import logging
@@ -113,7 +113,7 @@ async def make_tags(
 
 @router.get("/{post_id}", response_model=Post)
 async def get_post_detail(
-    post_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)
+    post_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     post = db.query(PostModel).filter(PostModel.id == post_id).first()
 
@@ -121,8 +121,8 @@ async def get_post_detail(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 게시글 입니다."
         )
-
-    background_tasks.add_task(increment_view, post_id)
+    if not current_user or post.user_id != current_user.id:
+        background_tasks.add_task(increment_view, post_id)
 
     return post
 
