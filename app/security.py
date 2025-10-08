@@ -2,6 +2,7 @@ import base64
 import hashlib
 import os
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -67,3 +68,21 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
     
     return user
+
+def get_current_user_optional(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security), db: Session = Depends(get_db)) ->Optional[UserModel]:
+    if credentials:
+        token = credentials.credentials
+        try:
+            payload = decode_access_token(token)
+            user_id = int(payload["sub"])
+        except ValueError as e:
+            raise HTTPException(status_code=401, detail=str(e))
+
+        # 사용자 조회
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+        
+        return user
+    else:
+        return None
