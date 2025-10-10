@@ -37,7 +37,9 @@ class PasswordHasher:
 # JWT 토큰 생성
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    ))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -51,10 +53,14 @@ def decode_access_token(token: str) -> dict:
         raise ValueError("유효하지 않은 토큰입니다.")
 
 # 인증 의존성 설정
-security = HTTPBearer()
+security = HTTPBearer() # 로그인 필수용
+security_optional = HTTPBearer(auto_error=False) # 로그인 선택용
 
-# 현재 사용자 정보 추출
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)) -> UserModel:
+# 현재 사용자 정보 추출(로그인 필수)
+def get_current_user(
+        credentials: HTTPAuthorizationCredentials = Depends(security),
+        db: Session = Depends(get_db)
+) -> UserModel:
     token = credentials.credentials
     try:
         payload = decode_access_token(token)
@@ -68,21 +74,30 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
     
     return user
-
-def get_current_user_optional(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security), db: Session = Depends(get_db)) ->Optional[UserModel]:
-    if credentials:
-        token = credentials.credentials
-        try:
-            payload = decode_access_token(token)
-            user_id = int(payload["sub"])
-        except ValueError as e:
-            raise HTTPException(status_code=401, detail=str(e))
+# 현재 사용자 정보 추출(로그인 선택)
+def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_optional),
+    db: Session = Depends(get_db)
+) ->Optional[UserModel]:
+    """
+    로그인이 선택적인 엔드포인트에서 사용
+    - Authorization 헤더가 없으면 None 반환
+    - 헤더가 있고 유효하면 User 반환
+    - 헤더가 있지만 유효하지 않으면 None 반환 (에러 발생 안 함)
+    """
+    
+    if not credentials:
+        return None
+    
+    token = credentials.credentials
+    try:
+        payload = decode_access_token(token)
+        user_id = int(payload["sub"])
 
         # 사용자 조회
-        user = db.query(UserModel).filter(UserModel.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
-        
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()    
         return user
-    else:
+    
+    except (ValueError, KeyError):
+        # 토큰이 잘못되었거나 만료된 경우 None 반환
         return None

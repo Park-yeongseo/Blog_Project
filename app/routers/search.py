@@ -1,9 +1,11 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from app.database import get_db
-from app.models import Post, Book, Tag
+from app.models import Post, Book, Tag, User
 from app.schemas import SearchResult
+from app.security import get_current_user_optional
 
 
 router = APIRouter(prefix="/search", tags=["Search"])
@@ -13,26 +15,32 @@ def search(
     q: str = "",
     tags: list[str] = Query(default=[]), # 최대 3개 선택
     page: int = 1,
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
     query = db.query(Post).join(Book).outerjoin(Post.tags)
 
-    # 포스트 제목 또는 책 제목 like 검색
-    if q:
-        query = query.filter(
-            or_(
-                Post.title.ilike(f"%{q}%"),
-                Book.title.ilike(f"%{q}%")
-            )
-        )
+    # 로그인한 경우 자기 게시글 제외
+    if current_user:
+        query = query.filter(Post.user_id != current_user.id)
 
-    # 태그 검색(최대 3개)
+    # 통합 검색: q가 있으면 모든 곳에서 검색
+    if q:
+        search_conditions = [
+            Post.title.ilike(f"%{q}%"),      # 게시글 제목
+            Post.content.ilike(f"%{q}%"),    # 게시글 내용
+            Book.title.ilike(f"%{q}%"),      # 책 제목
+            Book.isbn.ilike(f"%{q}%"),       # ISBN (부분 일치)
+            Tag.name.ilike(f"%{q}%")         # 태그 이름
+        ]
+        query = query.filter(or_(*search_conditions))
+        
+    # 태그 필터 (추가 필터링)
     if tags:
         query = query.filter(Tag.name.in_(tags))
 
-    # ISBN 정확히 일치
-    if q.isdigit() and len(q) in [10, 13]:
-        query = query.filter(Book.isbn == q)
+    # 최신순 정렬
+    query = query.order_by(Post.created_at.desc())
 
     # 페이지네이션
     page_size = 10
