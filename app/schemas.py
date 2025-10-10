@@ -89,7 +89,11 @@ class Comment(BaseModel):
 class CommentCreate(Comment):
     post_id: int
     parent_id : Optional[int] = Field(default=None, gt=0)
-    
+
+class CommentCreateRequest(BaseModel):  # 새 스키마 추가
+    content: TrimmedStr = Field(max_length=1000)
+    parent_id: Optional[int] = Field(default=None, gt=0)
+
 class CommentResponse(BaseModel):
     id : int
     post_id : int
