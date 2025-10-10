@@ -3,6 +3,7 @@ import random
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 import httpx
+from pydantic import BaseModel
 from sqlalchemy import and_, func, insert, update
 from app.database import get_db
 from app.models import Book, Post as PostModel, PostTag, Tag, User, UserTagPreference
@@ -55,11 +56,11 @@ async def make_tags(
     -책 isbn 번호
     -게시글 내용
     
-    역할 : 위 내용들을 기반한 태그를 아래의 태그 목록 내에서 겹치지 않게 최소 3개 최대 5개 출력하세요
+    역할 : 위 내용들을 기반한 가장 적합한 태그를 아래의 태그 목록 내에서 겹치지 않게 최소 3개 최대 5개 출력하세요
     -태그 목록 {tag_list}
     
     응답 형식 : 반드시 다음 json 형식으로만 응답하세요:
-    {"response": [{"tag_id": "태그 아이디1", "tag_name": "태그 이름1"},{"tag_id": "태그 아이디2", "tag_name": "태그 이름2"},{"tag_id": "태그 아이디3", "tag_name": "태그 이름3"}....]}
+    {{"response": [{{"tag_id": "태그 아이디1", "tag_name": "태그 이름1"}},{{"tag_id": "태그 아이디2", "tag_name": "태그 이름2"}},{{"tag_id": "태그 아이디3", "tag_name": "태그 이름3"}}....]}}
     """
     message.append({"role": "system", "content": system_content})
     message.append(
@@ -128,7 +129,7 @@ async def get_post_detail(
 
 
 @router.get("/{post_id}/related", response_model=List[Post])
-async def get_any_posts(post_id: int, limit: int = 5, db: Session = Depends(get_db)):
+async def get_any_posts(post_id: int, limit: int = 5, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_current_user_optional)):
     """
     해당 게시글 관련 게시글을 불러오는 엔드 포인트 입니다.
     """
@@ -139,9 +140,14 @@ async def get_any_posts(post_id: int, limit: int = 5, db: Session = Depends(get_
             status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 게시글 입니다."
         )
     post_tags = [tag.id for tag in post.tags]
-
+    
+    query = db.query(PostModel)
+    
+    if current_user:
+        query = query.filter(PostModel.user_id != current_user.id)
+        
     related = (
-        db.query(PostModel, func.count(PostTag.tag_id))
+        query.add_columns(func.count(PostTag.tag_id))
         .join(PostTag)
         .filter(PostTag.tag_id.in_(post_tags), PostModel.id != post.id)
         .group_by(PostModel.id)
