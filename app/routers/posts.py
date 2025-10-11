@@ -187,14 +187,8 @@ async def create_post(
             db.add(new_book)
 
         db.flush()
-        # tags = await make_tags(db, data.book_title, data.isbn, data.content)
+        tags = await make_tags(db, data.book_title, data.isbn, data.content)
 
-        # 🔧 임시: 수동으로 태그 지정 (Tag 테이블에 있는 tag_id 사용)
-        tags = [
-            {"tag_id": 1, "tag_name": "테스트태그1"},
-            {"tag_id": 2, "tag_name": "테스트태그2"},
-            {"tag_id": 3, "tag_name": "테스트태그3"}
-        ]
 
         new_posttag = [
             PostTag(post_id=new_post.id, tag_id=tag["tag_id"]) for tag in tags
