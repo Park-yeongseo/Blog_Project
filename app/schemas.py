@@ -75,14 +75,14 @@ class User(BaseModel):
 class UserResponse(BaseModel):
     id : int 
     username: str
-    email : str
+    email : Optional[str] = None
     bio : str 
     total_views: int
     created_at: datetime.datetime
     
     model_config = ConfigDict(from_attributes=True)
-    
-    
+
+
 class Comment(BaseModel):
     content: TrimmedStr = Field(max_length=1000)
     
