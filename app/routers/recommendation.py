@@ -10,9 +10,28 @@ from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/recommendation", tags=["recommendation"])
 
+@router.get("/popular", response_model=List[Post])
+async def popular_posts(
+    page: int = 1,
+    limit: int = 10,
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    db: Session = Depends(get_db),
+):
+    query = db.query(PostModel)
+    if current_user:
+        query = query.filter(PostModel.user_id != current_user.id)
+
+    posts = (
+        query
+        .order_by(PostModel.like_count.desc(), func.random())
+        .offset(limit * (page - 1))
+        .limit(limit)
+        .all()
+    )
+    return posts
 
 @router.get("/", response_model=List[Post])
-async def recommnend_post(
+async def recommend_post(
     page: int = 1,
     limit: int = 10,
     current_user: User = Depends(get_current_user),
@@ -45,22 +64,5 @@ async def recommnend_post(
     return posts
 
 
-@router.get("/popular", response_model=List[Post])
-async def popular_posts(
-    page: int = 1,
-    limit: int = 10,
-    current_user: Optional[User] = Depends(get_current_user_optional),
-    db: Session = Depends(get_db),
-):
-    query = db.query(PostModel)
-    if current_user:
-        query = query.filter(PostModel.user_id != current_user.id)
 
-    posts = (
-        query
-        .order_by(PostModel.like_count.desc(), func.random())
-        .offset(limit * (page - 1))
-        .limit(limit)
-        .all()
-    )
-    return posts
+
