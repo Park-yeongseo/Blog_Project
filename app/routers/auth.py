@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 
@@ -12,6 +12,10 @@ router = APIRouter(prefix="/auth", tags=["Auth"])  # 인증 엔드포인트
 # 회원가입
 @router.post("/signup", response_model=UserResponse)
 def signup(user_data: UserCreate, db: Session = Depends(get_db)):
+    
+    if user_data.password != user_data.password_test:
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="비밀번호가 일치하지 않습니다.")
+        
     # 이메일 중복 확인
     if db.query(UserModel).filter(UserModel.email == user_data.email).first():
         raise HTTPException(status_code=400, detail="이미 사용 중인 이메일입니다.")
