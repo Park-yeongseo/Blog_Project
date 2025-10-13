@@ -22,7 +22,7 @@ def normalize_str(a: str):
         
 
 Username = Annotated[
-    str, StringConstraints(max_length=20, min_length=2, pattern=r"^[A-Za-z가-힣]+$")
+    str, StringConstraints(max_length=20, min_length=2, pattern=r"^[A-Za-z가-힣0-9_]+$")
 ]
 TrimmedStr = Annotated[str, BeforeValidator(strip_string)]
 Normalizedstr = Annotated[str,BeforeValidator(normalize_str)]
