@@ -66,6 +66,29 @@ class UserCreate(BaseModel):
             raise ValueError("특수문자를 포함해야 합니다.")
         return password
 
+class UserPasswordUpdate(BaseModel):
+    password : str
+    new_password : str
+    new_password_test: str
+    
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, new_password: str):
+        if " " in new_password:
+            raise ValueError("공백은 포함할 수 없습니다.")
+        if len(new_password) < 8:
+            raise ValueError("비밀번호는 8자 이상이어야 합니다.")
+        if not any(c.isalpha() for c in new_password):
+            raise ValueError("영문을 포함해야 합니다.")
+        if not any(c.isdigit() for c in new_password):
+            raise ValueError("숫자를 포함해야 합니다.")
+        if not any(c in "!@#$%^&*" for c in new_password):
+            raise ValueError("특수문자를 포함해야 합니다.")
+        return new_password
+
+class UserInfoUpdate(BaseModel):
+    username: Optional[Username] = None
+    bio: Optional[str] = Field(default=None, max_length=500)
 
 class User(BaseModel):
     username: Username
