@@ -48,6 +48,7 @@ class UserCreate(BaseModel):
     username: Username
     email: EmailStr
     password: str
+    password_test: str
     bio: Optional[str] = Field(default=None, max_length=500)
 
     @field_validator("password")
