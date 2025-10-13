@@ -4,7 +4,7 @@ from datetime import datetime
 
 from app.database import get_db
 from app.models import User as UserModel
-from app.schemas import UserCreate, UserResponse, Login as LoginRequest
+from app.schemas import UserCreate, UserResponse, Login as LoginRequest, WithdrawRequest
 from app.security import PasswordHasher, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])  # 인증 엔드포인트
@@ -13,7 +13,6 @@ router = APIRouter(prefix="/auth", tags=["Auth"])  # 인증 엔드포인트
 @router.post("/signup", response_model=UserResponse)
 def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     
-    # 비밀번호 일치 확인
     if user_data.password != user_data.password_test:
         raise HTTPException(status_code=400, detail="비밀번호가 일치하지 않습니다.")
         
@@ -66,7 +65,17 @@ def logout(user: UserModel = Depends(get_current_user)):
 
 # 회원 탈퇴
 @router.delete("/withdraw")
-def withdraw(user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
+def withdraw(
+    withdraw_data: WithdrawRequest,
+    user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    # 비밀번호 검증
+    if not PasswordHasher.verify_password_combined(withdraw_data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
+
+    # 사용자 삭제
     db.delete(user)
     db.commit()
     return {"detail": "회원 탈퇴가 완료되었습니다."}

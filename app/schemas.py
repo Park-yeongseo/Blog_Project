@@ -107,6 +107,10 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class WithdrawRequest(BaseModel):
+    password: str
+
+
 class Comment(BaseModel):
     content: TrimmedStr = Field(max_length=1000)
     
