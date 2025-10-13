@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 - BookReview</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header id="header"></header>
+    
+    <!-- 메인 콘텐츠 -->
+    <main class="container">
+        <div id="postContainer">
+            <!-- 게시글 내용이 여기에 동적으로 추가됩니다 -->
+        </div>
+        
+        <!-- 댓글 섹션 -->
+        <div class="comments-section">
+            <h2 class="section-title">💬 댓글</h2>
+            
+            <!-- 댓글 작성 폼 (로그인 시에만 표시) -->
+            <div id="commentFormContainer"></div>
+            
+            <!-- 댓글 목록 -->
+            <div id="commentsContainer">
+                <!-- 댓글이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+        
+        <!-- 관련 게시글 -->
+        <div class="related-posts-section">
+            <h2 class="section-title">📖 관련 게시글</h2>
+            <div id="relatedPostsContainer" class="posts-grid">
+                <!-- 관련 게시글이 여기에 추가됩니다 -->
+            </div>
+        </div>
+    </main>
+    
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/pages/post-detail.js"></script>
+</body>
+</html>

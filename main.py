@@ -12,11 +12,20 @@ from app.routers.follows import router as follow_router
 from app.routers.search import router as search_router
 from app.schemas import UserInfoUpdate, UserPasswordUpdate, UserResponse
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.security import PasswordHasher, get_current_user, get_current_user_optional
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials= True,
+    allow_methods = ["*"],
+    allow_headers = ['*']
+)
 
 
 @app.exception_handler(ValidationError)
