@@ -151,4 +151,4 @@ class UserTagPreference(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     tag_id = Column(Integer, ForeignKey("tags.id",ondelete="CASCADE"), primary_key=True)
-    frequency = Column(Integer, default=0)
+    frequency = Column(Integer, default=1)

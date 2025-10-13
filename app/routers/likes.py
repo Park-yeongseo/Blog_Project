@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from httpx import delete
-from sqlalchemy import and_, insert, update
+from sqlalchemy import and_, insert, update, delete
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas import Post
