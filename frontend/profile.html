@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필 - BookReview</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header id="header"></header>
+    
+    <!-- 메인 콘텐츠 -->
+    <main class="container">
+        <!-- 프로필 정보 -->
+        <div class="profile-header card">
+            <div id="profileInfo">
+                <!-- 프로필 정보가 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+        
+        <!-- 탭 메뉴 -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="posts">작성한 글</button>
+            <button class="tab-btn" data-tab="followers">팔로워</button>
+            <button class="tab-btn" data-tab="following">팔로잉</button>
+        </div>
+        
+        <!-- 탭 컨텐츠 -->
+        <div id="tabContent">
+            <!-- 탭 내용이 여기에 동적으로 추가됩니다 -->
+        </div>
+    </main>
+    
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/pages/profile.js"></script>
+</body>
+</html>

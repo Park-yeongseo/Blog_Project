@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>검색 - BookReview</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header id="header"></header>
+    
+    <!-- 메인 콘텐츠 -->
+    <main class="container">
+        <h1 class="page-title">🔍 검색</h1>
+        
+        <!-- 검색 폼 -->
+        <div class="search-section card">
+            <form id="searchForm" class="search-form">
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        id="searchQuery" 
+                        class="form-input search-input" 
+                        placeholder="게시글 제목, 내용, 책 제목, ISBN, 태그 검색..."
+                        value=""
+                    >
+                    <button type="submit" class="btn btn-primary search-btn">
+                        검색
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 검색 결과 -->
+        <div id="searchResults">
+            <p class="search-hint">키워드를 입력하고 검색해보세요!</p>
+        </div>
+        
+        <!-- 페이지네이션 -->
+        <div id="pagination" class="pagination"></div>
+    </main>
+    
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/pages/search.js"></script>
+</body>
+</html>

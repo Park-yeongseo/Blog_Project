@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - BookReview</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header id="header"></header>
+    
+    <!-- 메인 콘텐츠 -->
+    <div class="auth-container">
+        <div class="auth-card card">
+            <h1 class="auth-title">회원가입</h1>
+            
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="username" class="form-label">사용자 이름</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        class="form-input" 
+                        placeholder="2-20자, 영문/한글/숫자/_만 가능"
+                        required
+                    >
+                    <div class="form-help">2-20자, 영문/한글/숫자/밑줄(_)만 사용 가능</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email" class="form-label">이메일</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        class="form-input" 
+                        placeholder="이메일을 입력하세요"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">비밀번호</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="비밀번호를 입력하세요"
+                        required
+                    >
+                    <div class="form-help">8자 이상, 영문/숫자/특수문자(!@#$%^&*) 포함</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="passwordTest" class="form-label">비밀번호 확인</label>
+                    <input 
+                        type="password" 
+                        id="passwordTest" 
+                        class="form-input" 
+                        placeholder="비밀번호를 다시 입력하세요"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="bio" class="form-label">자기소개 (선택)</label>
+                    <textarea 
+                        id="bio" 
+                        class="form-textarea" 
+                        placeholder="자기소개를 입력하세요 (최대 500자)"
+                        maxlength="500"
+                    ></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    회원가입
+                </button>
+            </form>
+            
+            <div class="auth-link">
+                이미 계정이 있으신가요? <a href="login.html">로그인</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/pages/signup.js"></script>
+</body>
+</html>
