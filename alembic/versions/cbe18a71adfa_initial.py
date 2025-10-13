@@ -1,8 +1,8 @@
-"""initial migrarion
+"""Initial
 
-Revision ID: 875646d1ec5c
+Revision ID: cbe18a71adfa
 Revises: 
-Create Date: 2025-10-06 15:39:54.992685
+Create Date: 2025-10-13 03:17:07.244633
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '875646d1ec5c'
+revision: str = 'cbe18a71adfa'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -51,8 +51,8 @@ def upgrade() -> None:
     sa.Column('follower_id', sa.Integer(), nullable=False),
     sa.Column('following_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['follower_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['following_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['follower_id'], ['users.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['following_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('follower_id', 'following_id')
     )
     op.create_table('posts',
@@ -65,15 +65,15 @@ def upgrade() -> None:
     sa.Column('like_count', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['isbn'], ['books.isbn'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('usertagpreferences',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('tag_id', sa.Integer(), nullable=False),
     sa.Column('frequency', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['tag_id'], ['tags.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['tag_id'], ['tags.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'tag_id')
     )
     op.create_table('comments',
@@ -84,94 +84,26 @@ def upgrade() -> None:
     sa.Column('content', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('depth', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['parent_id'], ['comments.id'], ),
-    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['parent_id'], ['comments.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('likes',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('post_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'post_id')
     )
     op.create_table('posttags',
     sa.Column('post_id', sa.Integer(), nullable=False),
     sa.Column('tag_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ),
-    sa.ForeignKeyConstraint(['tag_id'], ['tags.id'], ),
+    sa.ForeignKeyConstraint(['post_id'], ['posts.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['tag_id'], ['tags.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('post_id', 'tag_id')
     )
-    
-    from sqlalchemy import table, column, VARCHAR, Integer
-    
-    tags_table = table('tags',
-                       column('id', Integer),
-                       column('name', VARCHAR(50)))
-    
-    op.bulk_insert(tags_table,[
-    # 장르 (13개)
-    {'name': '소설'},
-    {'name': '에세이'},
-    {'name': '시'},
-    {'name': '자기계발'},
-    {'name': '경제경영'},
-    {'name': '과학'},
-    {'name': '역사'},
-    {'name': '철학'},
-    {'name': '예술'},
-    {'name': '실용서'},
-    {'name': '인문학'},
-    {'name': '심리학'},
-    {'name': '종교'},
-    
-    # 분위기/스타일 (12개)
-    {'name': '감동적인'},
-    {'name': '유머러스한'},
-    {'name': '긴장감있는'},
-    {'name': '서정적인'},
-    {'name': '철학적인'},
-    {'name': '따뜻한'},
-    {'name': '슬픈'},
-    {'name': '가벼운'},
-    {'name': '무거운'},
-    {'name': '실용적인'},
-    {'name': '생각을자극하는'},
-    {'name': '편안한'},
-    
-    # 주제/테마 - 소설 관련 (10개)
-    {'name': '성장'},
-    {'name': '사랑'},
-    {'name': '가족'},
-    {'name': '우정'},
-    {'name': '모험'},
-    {'name': '미스터리'},
-    {'name': '판타지'},
-    {'name': 'SF'},
-    {'name': '추리'},
-    {'name': '로맨스'},
-    
-    # 주제/테마 - 비소설 관련 (10개)
-    {'name': '리더십'},
-    {'name': '창의성'},
-    {'name': '커리어'},
-    {'name': '투자'},
-    {'name': '건강'},
-    {'name': '인간관계'},
-    {'name': '사회문제'},
-    {'name': '환경'},
-    {'name': '기술'},
-    {'name': '여행'},
-    
-    # 독자층/특성 (5개)
-    {'name': '입문자추천'},
-    {'name': '전문적인'},
-    {'name': '청소년'},
-    {'name': '베스트셀러'},
-    {'name': '고전'}
-    ])
     # ### end Alembic commands ###
 
 
