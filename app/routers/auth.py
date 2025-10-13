@@ -13,8 +13,9 @@ router = APIRouter(prefix="/auth", tags=["Auth"])  # 인증 엔드포인트
 @router.post("/signup", response_model=UserResponse)
 def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     
+    # 비밀번호 일치 확인
     if user_data.password != user_data.password_test:
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="비밀번호가 일치하지 않습니다.")
+        raise HTTPException(status_code=400, detail="비밀번호가 일치하지 않습니다.")
         
     # 이메일 중복 확인
     if db.query(UserModel).filter(UserModel.email == user_data.email).first():
@@ -66,11 +67,6 @@ def logout(user: UserModel = Depends(get_current_user)):
 # 회원 탈퇴
 @router.delete("/withdraw")
 def withdraw(user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
-    db.delete(user)
-    db.commit()
-    return {"detail": "회원 탈퇴가 완료되었습니다."}
-    
-    # 사용자 삭제
     db.delete(user)
     db.commit()
     return {"detail": "회원 탈퇴가 완료되었습니다."}
