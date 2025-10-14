@@ -75,6 +75,10 @@ async function loadPostForEdit(postId) {
     // 책 정보는 수정 시 숨김 처리
     document.getElementById('bookInfoSection').style.display = 'none';
     
+    document.getElementById('isbn').removeAttribute('required');
+    document.getElementById('bookTitle').removeAttribute('required');
+    document.getElementById('bookAuthor').removeAttribute('required');
+
   } catch (error) {
     hideLoading();
     handleError(error);
