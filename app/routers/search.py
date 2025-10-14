@@ -31,7 +31,6 @@ def search(
             Post.content.ilike(f"%{q}%"),    # 게시글 내용
             Book.title.ilike(f"%{q}%"),      # 책 제목
             Book.isbn.ilike(f"%{q}%"),       # ISBN (부분 일치)
-            Tag.name.ilike(f"%{q}%")         # 태그 이름
         ]
         query = query.filter(or_(*search_conditions))
         
