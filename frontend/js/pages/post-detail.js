@@ -26,6 +26,15 @@ async function loadPost(postId) {
   try {
     showLoading();
     currentPost = await getPost(postId);
+    
+    // 작성자 정보 추가로 불러오기
+    try {
+      const author = await getUserInfo(currentPost.user_id);
+      currentPost.username = author.username;
+    } catch (error) {
+      currentPost.username = `사용자${currentPost.user_id}`;
+    }
+    
     hideLoading();
     
     renderPost(currentPost);
@@ -50,16 +59,20 @@ function renderPost(post) {
       <div class="post-header">
         <h1 class="post-title">${escapeHtml(post.title)}</h1>
         <div class="post-meta">
-          <span class="post-date">${formatDate(post.created_at)}</span>
-          <span class="post-views">조회수 ${formatViewCount(post.views)}</span>
+          <span class="post-author">작성자: ${escapeHtml(post.username || '작성자')}</span>
+          <span class="post-date">📅 ${formatDate(post.created_at)}</span>
+          <span class="post-views">👁️ 조회수 ${formatViewCount(post.views)}</span>
         </div>
       </div>
       
-      <div class="post-tags">
-        ${post.tags.map(tag => `
-          <span class="tag">#${escapeHtml(tag.name)}</span>
-        `).join('')}
-      </div>
+
+      ${post.tags && post.tags.length > 0 ? `
+        <div class="post-tags">
+          ${post.tags.map(tag => `
+            <span class="tag">#${escapeHtml(tag.name)}</span>
+          `).join('')}
+        </div>
+      ` : ''}
       
       <div class="post-content">
         ${post.content}
@@ -70,7 +83,7 @@ function renderPost(post) {
           <button 
             class="btn btn-like ${isLiked ? 'liked' : ''}" 
             id="likeBtn"
-            onclick="toggleLike()"
+            onclick="handleLikeClick()"
           >
             <span class="like-icon">${isLiked ? '❤️' : '🤍'}</span>
             <span id="likeCount">${post.like_count}</span>
@@ -98,33 +111,66 @@ async function loadLikeStatus(postId) {
     const likeData = await getPostLikes(postId);
     const currentUserId = parseInt(getUserId());
     isLiked = likeData.users.includes(currentUserId);
+    likeCount = likeData.like_count;
+    
+    // ✅ 추가: UI가 이미 렌더링된 경우 업데이트
+    const likeBtn = document.getElementById('likeBtn');
+    const likeCountSpan = document.getElementById('likeCount');
+    
+    if (likeBtn && likeCountSpan) {
+      likeBtn.classList.toggle('liked', isLiked);
+      likeBtn.querySelector('.like-icon').textContent = isLiked ? '❤️' : '🤍';
+      likeCountSpan.textContent = likeCount;
+    }
+    
   } catch (error) {
     console.error('Failed to load like status:', error);
   }
 }
 
 // 좋아요 토글
-async function toggleLike() {
+async function handleLikeClick() {
   if (!isLoggedIn()) {
     showToast('로그인이 필요합니다.', 'warning');
     return;
   }
   
+  const likeBtn = document.getElementById('likeBtn');
+  
+  // 중복 클릭 방지
+  if (likeBtn.disabled) return;
+  likeBtn.disabled = true;
+  
   try {
+    // api.js의 toggleLike 함수 호출
     const result = await toggleLike(currentPost.id);
+    
+    // 전역 변수 업데이트
     isLiked = result.liked;
     likeCount = result.like_count;
     
     // UI 업데이트
-    const likeBtn = document.getElementById('likeBtn');
+    const likeIcon = likeBtn.querySelector('.like-icon');
     const likeCountSpan = document.getElementById('likeCount');
     
-    likeBtn.classList.toggle('liked', isLiked);
-    likeBtn.querySelector('.like-icon').textContent = isLiked ? '❤️' : '🤍';
+    if (result.liked) {
+      likeBtn.classList.add('liked');
+      likeIcon.textContent = '❤️';
+      showToast('좋아요를 눌렀습니다! ❤️', 'success');
+    } else {
+      likeBtn.classList.remove('liked');
+      likeIcon.textContent = '🤍';
+      showToast('좋아요를 취소했습니다.', 'info');
+    }
+    
     likeCountSpan.textContent = likeCount;
     
   } catch (error) {
+    console.error('좋아요 처리 중 오류:', error);
     handleError(error);
+  } finally {
+    // 버튼 다시 활성화
+    likeBtn.disabled = false;
   }
 }
 
@@ -180,7 +226,32 @@ async function handleCommentSubmit(e) {
 async function loadComments(postId) {
   try {
     const comments = await getComments(postId);
-    renderComments(comments);
+    
+    // ✅ 각 댓글 작성자의 username 가져오기
+    const uniqueUserIds = [...new Set(comments.map(c => c.user_id))];
+    const userMap = {};
+    
+    // 모든 사용자 정보를 한 번에 가져오기
+    await Promise.all(
+      uniqueUserIds.map(async (userId) => {
+        try {
+          const user = await getUserInfo(userId);
+          userMap[userId] = user.username;
+        } catch (error) {
+          console.error(`Failed to load user ${userId}:`, error);
+          userMap[userId] = `사용자${userId}`;
+        }
+      })
+    );
+    
+    // 댓글에 username 추가
+    const commentsWithUsername = comments.map(comment => ({
+      ...comment,
+      username: userMap[comment.user_id] || `사용자${comment.user_id}`
+    }));
+    
+    renderComments(commentsWithUsername);
+    
   } catch (error) {
     console.error('Failed to load comments:', error);
   }
@@ -203,10 +274,13 @@ function renderComments(comments) {
     const commentReplies = replies.filter(r => r.parent_id === comment.id);
     const isOwner = isLoggedIn() && isCurrentUser(comment.user_id);
     
+    // ✅ 추가: username 처리
+  const displayName = comment.username || `사용자${comment.user_id}`;
+
     return `
       <div class="comment">
         <div class="comment-header">
-          <span class="comment-author">사용자 ${comment.user_id}</span>
+          <span class="comment-author">${escapeHtml(displayName)}</span>
           <span class="comment-date">${formatRelativeTime(comment.created_at)}</span>
         </div>
         <div class="comment-content">${nl2br(escapeHtml(comment.content))}</div>
@@ -224,10 +298,14 @@ function renderComments(comments) {
           <div class="replies">
             ${commentReplies.map(reply => {
               const isReplyOwner = isLoggedIn() && isCurrentUser(reply.user_id);
+              
+              // 대댓글도 username 처리
+              const replyDisplayName = reply.username || `사용자${reply.user_id}`;
+
               return `
                 <div class="comment reply">
                   <div class="comment-header">
-                    <span class="comment-author">사용자 ${reply.user_id}</span>
+                    <span class="comment-author">${escapeHtml(replyDisplayName)}</span>
                     <span class="comment-date">${formatRelativeTime(reply.created_at)}</span>
                   </div>
                   <div class="comment-content">${nl2br(escapeHtml(reply.content))}</div>
@@ -341,7 +419,7 @@ function renderRelatedPosts(posts) {
         </span>
         <span class="stat">
           <span class="stat-icon">❤️</span>
-          ${post.like_count}
+          ${post.like_count || 0}
         </span>
       </div>
     </div>

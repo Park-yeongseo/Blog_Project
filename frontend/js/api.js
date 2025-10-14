@@ -147,6 +147,9 @@ async function createPost(postData) {
 async function updatePost(postId, postData) {
   return apiRequest(`/posts/${postId}`, {
     method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(postData),
   });
 }
@@ -196,8 +199,10 @@ async function getMyLikes(page = 1, limit = 10) {
 }
 
 // 게시글의 좋아요 정보
-async function getPostLikes(postId) {
-  return apiRequest(`/likes/${postId}/likes`);
+async function toggleLike(postId) {
+  return apiRequest(`/likes/${postId}/like`,{
+    method: 'POST',
+  });
 }
 
 // 좋아요 토글
@@ -254,12 +259,19 @@ async function getRecommendedPosts(page = 1, limit = 10) {
 
 // 통합 검색
 async function search(query = '', tags = [], page = 1) {
-  let url = `/search/?q=${encodeURIComponent(query)}&page=${page}`;
+  // URLSearchParams 사용 (여러 개의 동일한 파라미터를 배열로 처리)
+  const params = new URLSearchParams();
+  params.append('q', query);
+  params.append('page', page);
   
-  // 태그 파라미터 추가
+  // 각 태그를 별도의 tags 파라미터로 추가
   tags.forEach(tag => {
-    url += `&tags=${encodeURIComponent(tag)}`;
+    params.append('tags', tag);
   });
   
-  return apiRequest(url);
+  return apiRequest(`/search/?${params.toString()}`);
+}
+
+async function getAllTags() {
+  return apiRequest('/search/tags');
 }

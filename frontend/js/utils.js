@@ -86,3 +86,10 @@ function escapeHtml(text) {
 function nl2br(text) {
   return text.replace(/\n/g, '<br>');
 }
+
+// HTML 태그 제거 (텍스트만 추출)
+function stripHtmlTags(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent || div.innerText || '';
+}

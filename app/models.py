@@ -98,7 +98,7 @@ class Comment(Base):
     post = relationship("Post", back_populates="comments")
     user = relationship("User", back_populates="comments")
     parent = relationship(
-        "Comment", remote_side=[id], backref="replies", cascade="all, delete-orphan", single_parent=True
+        "Comment", remote_side=[id], backref="replies", cascade="save-update, merge", single_parent=True
     )
 
 
