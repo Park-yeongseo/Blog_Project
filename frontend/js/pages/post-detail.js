@@ -258,6 +258,7 @@ async function loadComments(postId) {
 }
 
 // 댓글 렌더링
+// 댓글 렌더링
 function renderComments(comments) {
   const container = document.getElementById('commentsContainer');
   
@@ -265,18 +266,6 @@ function renderComments(comments) {
     container.innerHTML = '<p class="text-muted">아직 댓글이 없습니다.</p>';
     return;
   }
-
-// 댓글 수정
-function showEditForm(commentId, content) {
-  const container = document.getElementById(`commentContent${commentId}`);
-container.innerHTML = `
-  <textarea id="editTextarea${commentId}" class="form-textarea">${escapeHtml(content)}</textarea>
-  <div class="comment-actions">
-    <button class="btn btn-primary btn-sm" onclick="submitEdit(${commentId})">저장</button>
-    <button class="btn btn-secondary btn-sm" onclick="cancelEdit(${commentId}, '${escapeHtml(content)}')">취소</button>
-  </div>
-`;
-}
   
   // 댓글과 대댓글 분리
   const topComments = comments.filter(c => c.depth === 0);
@@ -285,23 +274,23 @@ container.innerHTML = `
   container.innerHTML = topComments.map(comment => {
     const commentReplies = replies.filter(r => r.parent_id === comment.id);
     const isOwner = isLoggedIn() && isCurrentUser(comment.user_id);
-    
-    // username 처리
-  const displayName = comment.username || `사용자${comment.user_id}`;
+    const displayName = comment.username || `사용자${comment.user_id}`;
 
     return `
-      <div class="comment">
+      <div class="comment" data-comment-id="${comment.id}">
         <div class="comment-header">
           <span class="comment-author">${escapeHtml(displayName)}</span>
           <span class="comment-date">${formatRelativeTime(comment.created_at)}</span>
         </div>
-        <div class="comment-content">${nl2br(escapeHtml(comment.content))}</div>
+        <div class="comment-content" id="commentContent${comment.id}">
+          ${nl2br(escapeHtml(comment.content))}
+        </div>
         <div class="comment-actions">
           ${isLoggedIn() ? `
             <button class="btn-text" onclick="showReplyForm(${comment.id})">답글</button>
           ` : ''}
           ${isOwner ? `
-            <button class="btn-text" onclick="showEditForm(${comment.id}, '${escapeHtml(comment.content)}')">수정</button>
+            <button class="btn-text" onclick="showEditFormSafe(${comment.id})">수정</button>
             <button class="btn-text" onclick="deleteCommentConfirm(${comment.id})">삭제</button>
           ` : ''}
         </div>
@@ -311,19 +300,20 @@ container.innerHTML = `
           <div class="replies">
             ${commentReplies.map(reply => {
               const isReplyOwner = isLoggedIn() && isCurrentUser(reply.user_id);
-              
-              // 대댓글도 username 처리
               const replyDisplayName = reply.username || `사용자${reply.user_id}`;
 
               return `
-                <div class="comment reply">
+                <div class="comment reply" data-comment-id="${reply.id}">
                   <div class="comment-header">
                     <span class="comment-author">${escapeHtml(replyDisplayName)}</span>
                     <span class="comment-date">${formatRelativeTime(reply.created_at)}</span>
                   </div>
-                  <div class="comment-content">${nl2br(escapeHtml(reply.content))}</div>
+                  <div class="comment-content" id="commentContent${reply.id}">
+                    ${nl2br(escapeHtml(reply.content))}
+                  </div>
                   ${isReplyOwner ? `
                     <div class="comment-actions">
+                      <button class="btn-text" onclick="showEditFormSafe(${reply.id})">수정</button>
                       <button class="btn-text" onclick="deleteCommentConfirm(${reply.id})">삭제</button>
                     </div>
                   ` : ''}
@@ -351,6 +341,14 @@ container.innerHTML = `
       </div>
     `;
   }).join('');
+  
+  // 댓글 데이터를 DOM에 저장 (수정 시 사용)
+  comments.forEach(comment => {
+    const commentEl = container.querySelector(`[data-comment-id="${comment.id}"]`);
+    if (commentEl) {
+      commentEl.dataset.content = comment.content;
+    }
+  });
 }
 
 // 답글 폼 표시
@@ -467,4 +465,48 @@ function confirmDeletePost() {
 // 게시글 상세 페이지로 이동
 function goToPost(postId) {
   window.location.href = `post-detail.html?id=${postId}`;
+}
+
+// 댓글 수정
+// 안전한 수정 폼 표시 (data 속성에서 원본 내용 가져오기)
+function showEditFormSafe(commentId) {
+  const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
+  const originalContent = commentEl.dataset.content;
+  
+  const container = document.getElementById(`commentContent${commentId}`);
+  container.innerHTML = `
+    <textarea id="editTextarea${commentId}" class="form-textarea">${escapeHtml(originalContent)}</textarea>
+    <div class="comment-actions">
+      <button class="btn btn-primary btn-sm" onclick="submitEdit(${commentId})">저장</button>
+      <button class="btn btn-secondary btn-sm" onclick="cancelEditSafe(${commentId})">취소</button>
+    </div>
+  `;
+}
+
+// 안전한 수정 취소
+function cancelEditSafe(commentId) {
+  const commentEl = document.querySelector(`[data-comment-id="${commentId}"]`);
+  const originalContent = commentEl.dataset.content;
+  
+  const container = document.getElementById(`commentContent${commentId}`);
+  container.innerHTML = nl2br(escapeHtml(originalContent));
+}
+
+// 댓글 수정 제출
+async function submitEdit(commentId) {
+  const textarea = document.getElementById(`editTextarea${commentId}`);
+  const newContent = textarea.value.trim();
+  
+  if (!newContent) {
+    showToast('댓글 내용을 입력해주세요.', 'warning');
+    return;
+  }
+  
+  try {
+    await updateComment(commentId, { content: newContent });
+    showToast('댓글이 수정되었습니다.', 'success');
+    loadComments(currentPost.id);
+  } catch (error) {
+    handleError(error);
+  }
 }
