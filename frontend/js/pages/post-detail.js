@@ -113,7 +113,7 @@ async function loadLikeStatus(postId) {
     isLiked = likeData.users.includes(currentUserId);
     likeCount = likeData.like_count;
     
-    // ✅ 추가: UI가 이미 렌더링된 경우 업데이트
+    // UI가 이미 렌더링된 경우 업데이트
     const likeBtn = document.getElementById('likeBtn');
     const likeCountSpan = document.getElementById('likeCount');
     
@@ -227,7 +227,7 @@ async function loadComments(postId) {
   try {
     const comments = await getComments(postId);
     
-    // ✅ 각 댓글 작성자의 username 가져오기
+    // 각 댓글 작성자의 username 가져오기
     const uniqueUserIds = [...new Set(comments.map(c => c.user_id))];
     const userMap = {};
     
@@ -265,6 +265,18 @@ function renderComments(comments) {
     container.innerHTML = '<p class="text-muted">아직 댓글이 없습니다.</p>';
     return;
   }
+
+// 댓글 수정
+function showEditForm(commentId, content) {
+  const container = document.getElementById(`commentContent${commentId}`);
+container.innerHTML = `
+  <textarea id="editTextarea${commentId}" class="form-textarea">${escapeHtml(content)}</textarea>
+  <div class="comment-actions">
+    <button class="btn btn-primary btn-sm" onclick="submitEdit(${commentId})">저장</button>
+    <button class="btn btn-secondary btn-sm" onclick="cancelEdit(${commentId}, '${escapeHtml(content)}')">취소</button>
+  </div>
+`;
+}
   
   // 댓글과 대댓글 분리
   const topComments = comments.filter(c => c.depth === 0);
@@ -274,7 +286,7 @@ function renderComments(comments) {
     const commentReplies = replies.filter(r => r.parent_id === comment.id);
     const isOwner = isLoggedIn() && isCurrentUser(comment.user_id);
     
-    // ✅ 추가: username 처리
+    // username 처리
   const displayName = comment.username || `사용자${comment.user_id}`;
 
     return `
@@ -289,6 +301,7 @@ function renderComments(comments) {
             <button class="btn-text" onclick="showReplyForm(${comment.id})">답글</button>
           ` : ''}
           ${isOwner ? `
+            <button class="btn-text" onclick="showEditForm(${comment.id}, '${escapeHtml(comment.content)}')">수정</button>
             <button class="btn-text" onclick="deleteCommentConfirm(${comment.id})">삭제</button>
           ` : ''}
         </div>

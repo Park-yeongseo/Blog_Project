@@ -184,6 +184,29 @@ async function updateComment(commentId, content) {
   });
 }
 
+// 댓글 수정 저장
+async function submitEdit(commentId) {
+  const newContent = document.getElementById(`editTextarea${commentId}`).value.trim();
+  if (!newContent) {
+    showToast('내용을 입력해주세요.', 'warning');
+    return;
+  }
+
+  try {
+    await updateComment(commentId, { content: newContent });
+    showToast('댓글이 수정되었습니다.', 'success');
+    loadComments(currentPost.id);
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+// 댓글 수정 취소
+function cancelEdit(commentId, originalContent) {
+  const container = document.getElementById(`commentContent${commentId}`);
+  container.innerHTML = nl2br(escapeHtml(originalContent));
+}
+
 // 댓글 삭제
 async function deleteComment(commentId) {
   return apiRequest(`/posts/comments/${commentId}`, {
