@@ -1403,3 +1403,55 @@ a:hover {
   font-size: var(--font-size-sm);
   color: var(--text-light);
 }
+
+/* 작성자 링크 스타일 */
+.author-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.author-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.comment-author .author-link {
+  color: #007bff;
+  font-weight: 600;
+}
+
+/* 게시글 카드 메타 정보 */
+.post-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #666;
+  gap: 16px;
+}
+
+.post-card-author {
+  color: #666;
+  font-weight: 500; /* 강조 */
+}
+
+/* 작성자 링크 */
+.author-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.author-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* 게시글 카드 내 작성자 링크 호버 */
+.post-card .author-link:hover {
+  text-decoration: underline;
+}

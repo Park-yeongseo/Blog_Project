@@ -59,7 +59,12 @@ function renderPost(post) {
       <div class="post-header">
         <h1 class="post-title">${escapeHtml(post.title)}</h1>
         <div class="post-meta">
-          <span class="post-author">작성자: ${escapeHtml(post.username || '작성자')}</span>
+          <span class="post-author">
+            작성자: 
+            <a href="profile.html?id=${post.user_id}" class="author-link">
+              ${escapeHtml(post.username || '작성자')}
+            </a>
+          </span>
           <span class="post-date">📅 ${formatDate(post.created_at)}</span>
           <span class="post-views">👁️ 조회수 ${formatViewCount(post.views)}</span>
         </div>
@@ -258,7 +263,6 @@ async function loadComments(postId) {
 }
 
 // 댓글 렌더링
-// 댓글 렌더링
 function renderComments(comments) {
   const container = document.getElementById('commentsContainer');
   
@@ -279,7 +283,11 @@ function renderComments(comments) {
     return `
       <div class="comment" data-comment-id="${comment.id}">
         <div class="comment-header">
-          <span class="comment-author">${escapeHtml(displayName)}</span>
+          <span class="comment-author">
+            <a href="profile.html?id=${comment.user_id}" class="author-link">
+              ${escapeHtml(displayName)}
+            </a>
+          </span>
           <span class="comment-date">${formatRelativeTime(comment.created_at)}</span>
         </div>
         <div class="comment-content" id="commentContent${comment.id}">
@@ -305,7 +313,11 @@ function renderComments(comments) {
               return `
                 <div class="comment reply" data-comment-id="${reply.id}">
                   <div class="comment-header">
-                    <span class="comment-author">${escapeHtml(replyDisplayName)}</span>
+                    <span class="comment-author">
+                      <a href="profile.html?id=${reply.user_id}" class="author-link">
+                        ${escapeHtml(replyDisplayName)}
+                      </a>
+                    </span>
                     <span class="comment-date">${formatRelativeTime(reply.created_at)}</span>
                   </div>
                   <div class="comment-content" id="commentContent${reply.id}">
