@@ -231,7 +231,7 @@ function renderFollowList(users, title) {
   const container = document.getElementById('tabContent');
   
   if (!users || users.length === 0) {
-    container.innerHTML = `<p class="empty-message">${title}가 없습니다.</p>`;
+    container.innerHTML = `<p class="empty-message">${title}${title.endsWith('워') ? '가' : '이'} 없습니다.</p>`;
     return;
   }
   

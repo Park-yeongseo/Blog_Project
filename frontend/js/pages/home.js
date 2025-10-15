@@ -51,6 +51,37 @@ async function loadPosts() {
       posts = await getRecommendedPosts(currentPage, pageSize);
     }
     
+    // 각 게시글의 user_id로 username 가져오기
+    if (posts && posts.length > 0) {
+      const uniqueUserIds = [...new Set(
+        posts
+          .map(p => p.user_id)
+          .filter(id => id !== undefined && id !== null)
+      )];
+      
+      if (uniqueUserIds.length > 0) {
+        const userMap = {};
+        
+        await Promise.all(
+          uniqueUserIds.map(async (userId) => {
+            try {
+              const user = await getUserInfo(userId);
+              userMap[userId] = user.username;
+            } catch (error) {
+              console.error(`Failed to load user ${userId}:`, error);
+              userMap[userId] = '익명';
+            }
+          })
+        );
+        
+        // 게시글에 username 추가
+        posts = posts.map(post => ({
+          ...post,
+          username: userMap[post.user_id] || '익명'
+        }));
+      }
+    }
+    
     hideLoading();
     
     if (posts && posts.length > 0) {
@@ -77,7 +108,12 @@ function renderPosts(posts) {
     <div class="post-card" onclick="goToPost(${post.id})">
       <div class="post-card-header">
         <h3 class="post-card-title">${escapeHtml(post.title)}</h3>
-        <span class="post-card-date">${formatRelativeTime(post.created_at)}</span>
+        <div class="post-card-meta">
+          <span class="post-card-author">
+            ${escapeHtml(post.username || '익명')}
+          </span>
+          <span class="post-card-date">${formatRelativeTime(post.created_at)}</span>
+        </div>
       </div>
       
       <div class="post-card-content">
