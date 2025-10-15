@@ -1,0 +1,84 @@
+erDiagram
+    User ||--o{ Post : "작성"
+    User ||--o{ Comment : "작성"
+    User ||--o{ Like : "좋아요"
+    User ||--o{ Follow : "팔로우(follower)"
+    User ||--o{ Follow : "팔로잉(following)"
+    User ||--o{ UserTagPreference : "선호태그"
+    
+    Post ||--o{ Comment : "댓글"
+    Post ||--o{ Like : "좋아요"
+    Post ||--o{ PostTag : "태그연결"
+    Post }o--|| Book : "책정보"
+    
+    Tag ||--o{ PostTag : "게시글연결"
+    Tag ||--o{ UserTagPreference : "사용자선호"
+    
+    Comment ||--o{ Comment : "대댓글"
+    
+    User {
+        int id PK
+        varchar username UK
+        varchar email UK
+        varchar password_hash
+        text bio
+        int total_views
+        datetime created_at
+    }
+    
+    Post {
+        int id PK
+        int user_id FK
+        varchar title
+        text content
+        varchar isbn FK
+        int views
+        int like_count
+        datetime created_at
+    }
+    
+    Tag {
+        int id PK
+        varchar name UK
+    }
+    
+    PostTag {
+        int post_id PK,FK
+        int tag_id PK,FK
+    }
+    
+    Comment {
+        int id PK
+        int post_id FK
+        int user_id FK
+        int parent_id FK
+        text content
+        datetime created_at
+        int depth
+    }
+    
+    Like {
+        int user_id PK,FK
+        int post_id PK,FK
+        datetime created_at
+    }
+    
+    Follow {
+        int follower_id PK,FK
+        int following_id PK,FK
+        datetime created_at
+    }
+    
+    Book {
+        int id PK
+        varchar isbn UK
+        varchar title
+        varchar author
+        datetime created_at
+    }
+    
+    UserTagPreference {
+        int user_id PK,FK
+        int tag_id PK,FK
+        int frequency
+    }
