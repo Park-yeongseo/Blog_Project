@@ -1,31 +1,53 @@
+from contextlib import asynccontextmanager
 from typing import Optional
 from fastapi import Depends, FastAPI, status, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from sqlalchemy import update
+from app.config import settings
 from app.database import create_table, get_db
 from app.models import User
 from app.routers.auth import router as auth_router  # auth.py의 라우터 연결
 from app.routers import comments, posts, recommendation, likes
 from app.routers.follows import router as follow_router
 from app.routers.search import router as search_router
+from app.scheduler import start_scheduler, stop_scheduler
 from app.schemas import UserInfoUpdate, UserPasswordUpdate, UserResponse
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.security import PasswordHasher, get_current_user, get_current_user_optional
+import logging
+from app.redis_client import redis_client
 
-
-app = FastAPI()
+app = FastAPI(
+    title = settings.app_name,
+    debug= settings.debug,
+    docs_url="/docs" if settings.debug else None,
+    redoc_url= "/redoc" if settings.debug else None
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials= True,
-    allow_methods = ["*"],
-    allow_headers = ['*']
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await redis_client.connect()
+    start_scheduler()
+    print("스케줄러 작동 완료")
+    yield
+    await redis_client.disconnect()
+    stop_scheduler()
+    print("스케줄러 종료")
 
 
 @app.exception_handler(ValidationError)
@@ -126,7 +148,11 @@ async def update_user_info(
             current_user.username = data.username
 
         if data.bio != current_user.bio:
-            current_user.bio = data.bio if data.bio is not None else "사용자가 소개를 입력하지 않았습니다."
+            current_user.bio = (
+                data.bio
+                if data.bio is not None
+                else "사용자가 소개를 입력하지 않았습니다."
+            )
         db.commit()
         db.refresh(current_user)
         return current_user

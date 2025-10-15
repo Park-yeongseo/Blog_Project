@@ -1,10 +1,11 @@
 import json
 import random
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 import httpx
 from pydantic import BaseModel
 from sqlalchemy import and_, func, insert, update
+from app.redis_client import redis_client
 from app.database import get_db
 from app.models import Book, Post as PostModel, PostTag, Tag, User, UserTagPreference
 from app.schemas import Post, PostCreate, PostUpdate
@@ -20,24 +21,6 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 logger = logging.getLogger()
 
 
-def increment_view(post_id: int):
-    """
-    조회수를 증가시키는 로직
-    """
-    from app.database import SessionLocal
-    db = SessionLocal()
-    try:
-        db.execute(
-            update(PostModel)
-            .where(PostModel.id == post_id)
-            .values(views=PostModel.views + 1)
-        )
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Failed to increment view count: {e}")
-    finally:
-        db.close()
 
 
 async def make_tags(
@@ -114,7 +97,7 @@ async def make_tags(
 
 @router.get("/{post_id}", response_model=Post)
 async def get_post_detail(
-    post_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_current_user_optional)
+    post_id: int,request: Request, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     post = db.query(PostModel).filter(PostModel.id == post_id).first()
 
@@ -122,8 +105,18 @@ async def get_post_detail(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 게시글 입니다."
         )
-    if not current_user or post.user_id != current_user.id:
-        background_tasks.add_task(increment_view, post_id)
+    client_ip = request.client.host
+    
+    view_key = f'post:{post_id}:viewed:{client_ip}'
+    
+    already_viewed = await redis_client.exists(view_key)
+    
+    if not already_viewed:
+        await redis_client.incr(f"post:{post_id}:views")
+        await redis_client.set(view_key,"1",expire=86400)
+        logger.info(f"새로운 조회:{client_ip}")
+    else:
+        logger.info(f'24시간 내 중복조회:{client_ip}')
 
     return post
 
