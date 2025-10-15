@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  frontend:
+    container_name: blog-frontend
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build: .
+    container_name: blog-backend
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    volumes:
+      - ./data/blog.db:/app/data/blog.db
+    ports:
+      - "8000"
+    restart: unless-stopped
+
+  redis:
+    container_name: blog-redis
+    image: redis:alpine
+    ports:
+      - "6379"
+    restart: unless-stopped
+
+
