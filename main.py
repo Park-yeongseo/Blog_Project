@@ -168,7 +168,7 @@ async def update_user_info(
 
 @app.get('user/{username}', response_model=UserResponse)
 async def search_user(username: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == username):
+    user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당유저가 존재하지 않습니다.")
     return user
