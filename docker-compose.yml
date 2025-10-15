@@ -22,14 +22,14 @@ services:
       - redis
     volumes:
       - ./data/blog.db:/app/data/blog.db
-    ports:
+    expose:
       - "8000"
     restart: unless-stopped
 
   redis:
     container_name: blog-redis
     image: redis:alpine
-    ports:
+    expose:
       - "6379"
     restart: unless-stopped
 
