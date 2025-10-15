@@ -1,15 +1,13 @@
-
-
 function getToken() {
-  return localStorage.getItem(TOKEN_KEY);  // ← 수정!
+  return localStorage.getItem(TOKEN_KEY);
 }
 
 function setToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);  // ← 수정!
+  localStorage.setItem(TOKEN_KEY, token);
 }
 
 function removeToken() {
-  localStorage.removeItem(TOKEN_KEY);  // ← 수정!
+  localStorage.removeItem(TOKEN_KEY);
 }
 
 // API 요청 래퍼 함수
@@ -48,28 +46,36 @@ async function apiRequest(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      // 에러 처리
+      // 에러 처리 - status를 포함한 에러 객체 생성
       const errorMessage = data.detail || ERROR_MESSAGES.UNKNOWN_ERROR;
       
+      // 401 에러: 로그인 페이지가 아닌 경우에만 리다이렉트
       if (response.status === 401) {
-        // 인증 실패 - 로그인 페이지로 이동
-        removeToken();
-        window.location.href = 'login.html';
-        throw new Error(ERROR_MESSAGES.UNAUTHORIZED);
+        const currentPath = window.location.pathname;
+        const isLoginPage = currentPath.includes('login.html');
+        const isSignupPage = currentPath.includes('signup.html');
+        
+        // 로그인/회원가입 페이지가 아닌 경우에만 리다이렉트
+        if (!isLoginPage && !isSignupPage) {
+          removeToken();
+          window.location.href = 'login.html';
+        }
       }
       
-      throw new Error(errorMessage);
+      // status를 포함한 에러 객체 생성
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.response = data;
+      throw error;
     }
 
     return data;
   } catch (error) {
-    if (error.message === ERROR_MESSAGES.UNAUTHORIZED) {
-      throw error;
-    }
-    
     // 네트워크 에러
     if (!navigator.onLine) {
-      throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
+      const networkError = new Error(ERROR_MESSAGES.NETWORK_ERROR);
+      networkError.status = 0;
+      throw networkError;
     }
     
     throw error;
@@ -242,7 +248,7 @@ async function getMyLikes(page = 1, limit = 10) {
 // 좋아요 토글
 async function toggleLike(postId) {
   return apiRequest(`/likes/${postId}/like`, {
-    method: 'POST',  // ← 객체로 수정!
+    method: 'POST',
   });
 }
 
