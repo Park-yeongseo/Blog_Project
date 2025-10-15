@@ -147,6 +147,9 @@ async function createPost(postData) {
 async function updatePost(postId, postData) {
   return apiRequest(`/posts/${postId}`, {
     method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(postData),
   });
 }
@@ -174,11 +177,42 @@ async function createComment(postId, commentData) {
 }
 
 // 댓글 수정
-async function updateComment(commentId, content) {
+async function updateComment(commentId, commentData) {
   return apiRequest(`/posts/comments/${commentId}`, {
     method: 'PUT',
-    body: JSON.stringify({ content }),
+    body: JSON.stringify(commentData),
   });
+}
+
+// 댓글 수정 제출
+async function submitEdit(commentId) {
+  const textarea = document.getElementById(`editTextarea${commentId}`);
+  const newContent = textarea.value.trim();
+  
+  if (!newContent) {
+    showToast('댓글 내용을 입력해주세요.', 'warning');
+    return;
+  }
+  
+  try {
+    await updateComment(commentId, { content: newContent });
+    showToast('댓글이 수정되었습니다.', 'success');
+    loadComments(currentPost.id);
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+// 댓글 수정 취소
+function cancelEdit(commentId, originalContent) {
+  const container = document.getElementById(`commentContent${commentId}`);
+  container.innerHTML = nl2br(escapeHtml(originalContent));
+}
+
+// 댓글 수정 취소
+function cancelEdit(commentId, originalContent) {
+  const container = document.getElementById(`commentContent${commentId}`);
+  container.innerHTML = nl2br(escapeHtml(originalContent));
 }
 
 // 댓글 삭제
@@ -196,15 +230,20 @@ async function getMyLikes(page = 1, limit = 10) {
 }
 
 // 게시글의 좋아요 정보
-async function getPostLikes(postId) {
-  return apiRequest(`/likes/${postId}/likes`);
+async function toggleLike(postId) {
+  return apiRequest(`/likes/${postId}/like`,{
+    method: 'POST',
+  });
 }
 
 // 좋아요 토글
 async function toggleLike(postId) {
-  return apiRequest(`/likes/${postId}/like`, {
-    method: 'POST',
-  });
+  return await apiRequest(`/likes/${postId}/like`, 'POST');
+}
+
+// 좋아요 상태 조회
+async function getPostLikes(postId) {
+  return await apiRequest(`/likes/${postId}/likes`);
 }
 
 // ===== 팔로우 API =====
@@ -254,12 +293,19 @@ async function getRecommendedPosts(page = 1, limit = 10) {
 
 // 통합 검색
 async function search(query = '', tags = [], page = 1) {
-  let url = `/search/?q=${encodeURIComponent(query)}&page=${page}`;
+  // URLSearchParams 사용 (여러 개의 동일한 파라미터를 배열로 처리)
+  const params = new URLSearchParams();
+  params.append('q', query);
+  params.append('page', page);
   
-  // 태그 파라미터 추가
+  // 각 태그를 별도의 tags 파라미터로 추가
   tags.forEach(tag => {
-    url += `&tags=${encodeURIComponent(tag)}`;
+    params.append('tags', tag);
   });
   
-  return apiRequest(url);
+  return apiRequest(`/search/?${params.toString()}`);
+}
+
+async function getAllTags() {
+  return apiRequest('/search/tags');
 }

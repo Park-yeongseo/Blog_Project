@@ -67,9 +67,9 @@ app.include_router(recommendation.router)
 app.include_router(posts.router)
 app.include_router(likes.router)
 
-# @app.get('/healthy')
-# def health_check():
-#     return {'hello': 'world'}
+@app.get('/healthy')
+def health_check():
+    return {'hello': 'world'}
 
 
 @app.get("/user/{user_id}", response_model=UserResponse)

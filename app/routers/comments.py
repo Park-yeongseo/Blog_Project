@@ -58,7 +58,10 @@ def create_comment(
 
 # 댓글 목록 조회
 @router.get("/{post_id}/comments")
-def get_comments(post_id: int, db: Session = Depends(get_db)):
+async def get_comments(
+    post_id: int,
+    db: Session = Depends(get_db)
+):
     
     #해당 게시글의 모든 댓글을 시간순으로 조회
     comments = db.query(CommentModel).filter(

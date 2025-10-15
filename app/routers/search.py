@@ -31,6 +31,7 @@ def search(
             Post.content.ilike(f"%{q}%"),    # 게시글 내용
             Book.title.ilike(f"%{q}%"),      # 책 제목
             Book.isbn.ilike(f"%{q}%"),       # ISBN (부분 일치)
+            Tag.name.ilike(f"%{q}%")         # 태그 이름
         ]
         query = query.filter(or_(*search_conditions))
         
@@ -57,3 +58,10 @@ def search(
         )
         for post in results
     ]
+
+
+@router.get("/tags")
+async def get_all_tags(db: Session = Depends(get_db)):
+    
+    tags = db.query(Tag).all()
+    return [tag.name for tag in tags]

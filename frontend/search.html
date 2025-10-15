@@ -14,23 +14,42 @@
     <main class="container">
         <h1 class="page-title">🔍 검색</h1>
         
-        <!-- 검색 폼 -->
-        <div class="search-section card">
-            <form id="searchForm" class="search-form">
-                <div class="form-group">
-                    <input 
-                        type="text" 
-                        id="searchQuery" 
-                        class="form-input search-input" 
-                        placeholder="게시글 제목, 내용, 책 제목, ISBN, 태그 검색..."
-                        value=""
-                    >
-                    <button type="submit" class="btn btn-primary search-btn">
-                        검색
-                    </button>
-                </div>
-            </form>
-        </div>
+<!-- 검색 섹션 -->
+<div class="search-section card">
+  <form id="searchForm" class="search-form">
+    <div class="form-group">
+      <input 
+        type="text" 
+        id="searchQuery" 
+        class="form-input search-input" 
+        placeholder="게시글 제목, 내용, 책 제목, ISBN 검색..."
+        value=""
+      >
+      <button type="submit" class="btn btn-primary search-btn">
+        검색
+      </button>
+    </div>
+  </form>
+  
+  <!-- 태그 필터 섹션 (토글 버튼 추가) -->
+  <div class="tags-filter-section">
+    <div class="tags-filter-header">
+      <h3 class="filter-title">
+        🏷️ 태그로 검색 
+        <span id="selectedTagsCount" class="selected-count" style="display: none;"></span>
+      </h3>
+      <button type="button" id="toggleTagsBtn" class="btn-toggle-tags">
+        <span class="toggle-icon">▼</span>
+        <span>태그 펼치기</span>
+      </button>
+    </div>
+    
+    <!-- 기본적으로 숨김 -->
+    <div id="tagsCheckboxContainer" class="tags-checkbox-grid" style="display: none;">
+      <!-- 체크박스가 동적으로 추가됩니다 -->
+    </div>
+  </div>
+</div>
         
         <!-- 검색 결과 -->
         <div id="searchResults">

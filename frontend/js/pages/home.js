@@ -81,7 +81,7 @@ function renderPosts(posts) {
       </div>
       
       <div class="post-card-content">
-        ${escapeHtml(truncateText(post.content, 150))}
+        ${truncateText(stripHtmlTags(post.content), 100)}
       </div>
       
       <div class="post-card-tags">
