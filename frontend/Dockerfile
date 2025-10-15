@@ -6,6 +6,8 @@ RUN rm -rf /usr/share/nginx/html/*
 # 프론트엔드 파일들을 nginx 디렉토리로 복사
 COPY . /usr/share/nginx/html
 
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Nginx 기본값 포트
 EXPOSE 80 
 
