@@ -1,3 +1,17 @@
+
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);  // ← 수정!
+}
+
+function setToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);  // ← 수정!
+}
+
+function removeToken() {
+  localStorage.removeItem(TOKEN_KEY);  // ← 수정!
+}
+
 // API 요청 래퍼 함수
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -209,11 +223,6 @@ function cancelEdit(commentId, originalContent) {
   container.innerHTML = nl2br(escapeHtml(originalContent));
 }
 
-// 댓글 수정 취소
-function cancelEdit(commentId, originalContent) {
-  const container = document.getElementById(`commentContent${commentId}`);
-  container.innerHTML = nl2br(escapeHtml(originalContent));
-}
 
 // 댓글 삭제
 async function deleteComment(commentId) {
@@ -229,16 +238,12 @@ async function getMyLikes(page = 1, limit = 10) {
   return apiRequest(`/likes/user?page=${page}&limit=${limit}`);
 }
 
-// 게시글의 좋아요 정보
-async function toggleLike(postId) {
-  return apiRequest(`/likes/${postId}/like`,{
-    method: 'POST',
-  });
-}
 
 // 좋아요 토글
 async function toggleLike(postId) {
-  return await apiRequest(`/likes/${postId}/like`, 'POST');
+  return apiRequest(`/likes/${postId}/like`, {
+    method: 'POST',  // ← 객체로 수정!
+  });
 }
 
 // 좋아요 상태 조회

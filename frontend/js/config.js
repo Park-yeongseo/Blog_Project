@@ -1,5 +1,5 @@
 // API 기본 설정
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '/api';
 
 // 로컬 스토리지 키
 const TOKEN_KEY = 'access_token';

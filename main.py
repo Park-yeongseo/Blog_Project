@@ -20,20 +20,6 @@ from app.security import PasswordHasher, get_current_user, get_current_user_opti
 import logging
 from app.redis_client import redis_client
 
-app = FastAPI(
-    title = settings.app_name,
-    debug= settings.debug,
-    docs_url="/docs" if settings.debug else None,
-    redoc_url= "/redoc" if settings.debug else None
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -49,6 +35,21 @@ async def lifespan(app: FastAPI):
     stop_scheduler()
     print("스케줄러 종료")
 
+app = FastAPI(
+    title = settings.app_name,
+    debug= settings.debug,
+    lifespan=lifespan,  # ← 추가!
+    docs_url="/docs" if settings.debug else None,
+    redoc_url= "/redoc" if settings.debug else None
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.exception_handler(ValidationError)
 def validation_handler(request, exc):
@@ -67,9 +68,9 @@ app.include_router(recommendation.router)
 app.include_router(posts.router)
 app.include_router(likes.router)
 
-@app.get('/healthy')
-def health_check():
-    return {'hello': 'world'}
+# @app.get('/healthy')
+# def health_check():
+#     return {'hello': 'world'}
 
 
 @app.get("/user/{user_id}", response_model=UserResponse)
@@ -164,3 +165,10 @@ async def update_user_info(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="정보 변경에 실패 했습니다.",
         )
+
+@app.get('user/{username}', response_model=UserResponse)
+async def search_user(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당유저가 존재하지 않습니다.")
+    return user
