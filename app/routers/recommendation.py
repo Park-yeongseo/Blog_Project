@@ -13,7 +13,7 @@ router = APIRouter(prefix="/recommendation", tags=["recommendation"])
 @router.get("/popular", response_model=List[Post])
 async def popular_posts(
     page: int = 1,
-    limit: int = 10,
+    limit: int = 9,
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db),
 ):
@@ -33,7 +33,7 @@ async def popular_posts(
 @router.get("/", response_model=List[Post])
 async def recommend_post(
     page: int = 1,
-    limit: int = 10,
+    limit: int = 9,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
