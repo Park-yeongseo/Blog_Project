@@ -122,7 +122,7 @@ async def get_post_detail(
 
 
 @router.get("/{post_id}/related", response_model=List[Post])
-async def get_any_posts(post_id: int, limit: int = 5, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_current_user_optional)):
+async def get_any_posts(post_id: int, limit: int = 6, db: Session = Depends(get_db), current_user: Optional[User] = Depends(get_current_user_optional)):
     """
     해당 게시글 관련 게시글을 불러오는 엔드 포인트 입니다.
     """
