@@ -416,7 +416,7 @@ function deleteCommentConfirm(commentId) {
 // 관련 게시글 로드
 async function loadRelatedPosts(postId) {
   try {
-    const posts = await getRelatedPosts(postId, 5);
+    const posts = await getRelatedPosts(postId, 3);
     renderRelatedPosts(posts);
   } catch (error) {
     console.error('Failed to load related posts:', error);

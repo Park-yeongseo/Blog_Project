@@ -1,6 +1,6 @@
 let currentTab = 'popular';
 let currentPage = 1;
-const pageSize = 10;
+const pageSize = 9;
 
 // 페이지 로드 시 실행
 document.addEventListener('DOMContentLoaded', () => {
